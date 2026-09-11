@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HealthResQ AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+
+    <header>
+        <div class="logo">
+            HealthResQ AI
+        </div>
+
+        <div class="tagline">
+            Right Medicine. Right PHC. Right Time.
+        </div>
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main>
+
+        <section class="welcome">
+
+            <h1>PHC Resource Dashboard</h1>
+
+            <p>
+                Monitor medicine availability across Primary Health Centres.
+            </p>
+
+        </section>
+
+
+        <!-- PHC SELECTION -->
+
+        <section class="phc-section">
+
+            <label for="phcSelect">
+                Select PHC
+            </label>
+
+            <select id="phcSelect">
+
+                <option value="">
+                    -- Select PHC --
+                </option>
+
+            </select>
+
+        </section>
+
+
+        <!-- INVENTORY -->
+
+        <section class="inventory-section">
+
+            <h2>Medicine Inventory</h2>
+
+            <div id="inventoryContainer">
+
+                <p class="message">
+                    Select a PHC to view inventory.
+                </p>
+
+            </div>
+
+        </section>
+        <section class="forecast-section">
+
+    <h2>AI Demand Forecast</h2>
+
+    <div class="forecast-controls">
+
+        <select id="forecastMedicine">
+            <option value="">Select Medicine</option>
+        </select>
+
+        <button onclick="loadForecast()">
+            Generate AI Forecast
+        </button>
+
+    </div>
+
+    <div id="forecastResult">
+        <p class="message">
+            Select a medicine to generate demand forecast.
+        </p>
+    </div>
+
+</section>
+<section class="prescription-section">
+
+    <h2>Prescription Scanner</h2>
+
+    <p>
+        Upload a patient's prescription and check medicine availability.
+    </p>
+
+    <form id="prescriptionForm">
+
+        <input
+            type="file"
+            id="prescriptionFile"
+            accept=".jpg,.jpeg,.png"
+            required
+        >
+
+        <button type="submit">
+            Check Prescription
+        </button>
+
+    </form>
+
+    <div id="uploadResult"></div>
+
+    <div id="prescriptionResult"></div>
+
+</section>
+
+<section class="national-section">
+
+    <h2>National Health Network</h2>
+
+    <button onclick="loadNationalDashboard()">
+        Load National Dashboard
+    </button>
+
+    <div id="nationalDashboard">
+
+        <p class="message">
+            Click the button to load national network status.
+        </p>
+
+    </div>
+
+</section>
+<section class="system-section">
+
+    <h2>System Status</h2>
+
+    <button onclick="loadSystemStatus()">
+        Check System Status
+    </button>
+
+    <div id="systemStatus"></div>
+
+</section>
+
+    </main>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
+
