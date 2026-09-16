@@ -53,7 +53,7 @@ async function loadMedicines() {
     try {
 
         const response = await fetch(
-            `${API_URL}/medicines`
+            `${API_URL}/medicines/search?name=medicine`
         );
 
         const medicines = await response.json();
@@ -66,7 +66,7 @@ async function loadMedicines() {
             const option =
                 document.createElement("option");
 
-            option.value = medicine.id;
+            option.value = medicine.rxcui;
 
             option.textContent = medicine.name;
 
