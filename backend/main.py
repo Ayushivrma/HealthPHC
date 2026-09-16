@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from forecast_model import forecast_next_days
 import models
 import schemas
+import httpx
 
 from federated_model import (
     train_local_model,
@@ -22,6 +23,7 @@ from database import engine, get_db
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
+
 
 
 # Create FastAPI application
@@ -135,6 +137,37 @@ def get_medicines(
     medicines = db.query(models.Medicine).all()
 
     return medicines
+
+@app.get("/medicines/search")
+async def search_medicines(name: str):
+    if not name.strip():
+        return []
+
+    url = "https://rxnav.nlm.nih.gov/REST/drugs.json"
+
+    params = {
+        "name": name
+    }
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+    groups = data.get("drugGroup", {}).get("conceptGroup", [])
+
+    results = []
+
+    for group in groups:
+        concepts = group.get("conceptProperties", [])
+
+        for item in concepts:
+            results.append({
+                "name": item.get("name"),
+                "rxcui": item.get("rxcui")
+            })
+
+    return results[:20]
 
 
 # ==================================================
