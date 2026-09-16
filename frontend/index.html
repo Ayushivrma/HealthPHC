@@ -80,9 +80,16 @@
 
     <div class="forecast-controls">
 
-        <select id="forecastMedicine">
-            <option value="">Select Medicine</option>
-        </select>
+        <input
+    type="text"
+    id="medicineSearch"
+    placeholder="Search medicine..."
+    autocomplete="off"
+>
+
+<select id="forecastMedicine">
+    <option value="">Select Medicine</option>
+</select>
 
         <button onclick="loadForecast()">
             Generate AI Forecast

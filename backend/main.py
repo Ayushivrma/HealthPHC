@@ -140,35 +140,56 @@ def get_medicines(
 
 @app.get("/medicines/search")
 async def search_medicines(name: str):
+
     if not name.strip():
         return []
 
-    url = "https://rxnav.nlm.nih.gov/REST/drugs.json"
+    url = "https://rxnav.nlm.nih.gov/REST/approximateTerm.json"
 
     params = {
-        "name": name
+        "term": name,
+        "maxEntries": 20
     }
 
-    async with httpx.AsyncClient(timeout=10) as client:
-        response = await client.get(url, params=params)
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.get(url, params=params)
+
+        print("RxNorm Status:", response.status_code)
+        print("RxNorm URL:", response.url)
+
         response.raise_for_status()
+
         data = response.json()
 
-    groups = data.get("drugGroup", {}).get("conceptGroup", [])
+        print("RxNorm Response:", data)
 
-    results = []
+        candidates = (
+            data
+            .get("approximateGroup", {})
+            .get("candidate", [])
+        )
 
-    for group in groups:
-        concepts = group.get("conceptProperties", [])
+        results = []
 
-        for item in concepts:
-            results.append({
-                "name": item.get("name"),
-                "rxcui": item.get("rxcui")
-            })
+        for item in candidates:
+            if item.get("name"):
+                results.append({
+                    "name": item.get("name"),
+                    "rxcui": item.get("rxcui")
+                })
 
-    return results[:20]
+        print("Medicine Results:", results)
 
+        return results[:20]
+
+    except Exception as e:
+
+        print("Medicine Search Error:", str(e))
+
+        return {
+            "error": str(e)
+        }
 
 # ==================================================
 # INVENTORY APIs

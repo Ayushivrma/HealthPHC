@@ -1,6 +1,6 @@
 // Backend URL
-
-const API_URL = "https://healthphc-6.onrender.com";
+const API_URL = "http://127.0.0.1:8000";
+//const API_URL = "https://healthphc-6.onrender.com";
 
 // HTML elements
 
@@ -48,39 +48,66 @@ async function loadPHCs() {
     }
 
 }
-async function loadMedicines() {
+let medicineSearchTimeout;
 
-    try {
+const medicineSearch =
+    document.getElementById("medicineSearch");
 
-        const response = await fetch(
-            `${API_URL}/medicines/search?name=medicine`
-        );
+const medicineSelect =
+    document.getElementById("forecastMedicine");
 
-        const medicines = await response.json();
+medicineSearch.addEventListener("input", function () {
 
-        const medicineSelect =
-            document.getElementById("forecastMedicine");
+    clearTimeout(medicineSearchTimeout);
 
-        medicines.forEach(medicine => {
+    const query = medicineSearch.value.trim();
 
-            const option =
-                document.createElement("option");
+    medicineSelect.innerHTML =
+        '<option value="">Select Medicine</option>';
 
-            option.value = medicine.rxcui;
-
-            option.textContent = medicine.name;
-
-            medicineSelect.appendChild(option);
-        });
-
-    } catch (error) {
-
-        console.error(
-            "Error loading medicines:",
-            error
-        );
+    if (query.length < 2) {
+        return;
     }
-}
+
+    medicineSearchTimeout = setTimeout(async function () {
+
+        try {
+
+            const response = await fetch(
+                `${API_URL}/medicines/search?name=${encodeURIComponent(query)}`
+            );
+
+            if (!response.ok) {
+                throw new Error("Medicine search failed");
+            }
+
+            const medicines = await response.json();
+
+            medicines.forEach(medicine => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = medicine.rxcui;
+
+                option.textContent =
+                    medicine.name;
+
+                medicineSelect.appendChild(option);
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Error searching medicines:",
+                error
+            );
+
+        }
+
+    }, 300);
+});
 
 // --------------------------------------------------
 // LOAD INVENTORY
