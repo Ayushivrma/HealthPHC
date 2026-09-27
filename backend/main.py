@@ -101,6 +101,23 @@ def get_phcs(
 
     return phcs
 
+@app.delete("/phcs/{phc_id}")
+def delete_phc(
+    phc_id: int,
+    db: Session = Depends(get_db)
+):
+    phc = db.query(models.PHC).filter(models.PHC.id == phc_id).first()
+
+    if not phc:
+        return {"message": "PHC not found"}
+
+    db.delete(phc)
+    db.commit()
+
+    return {
+        "message": "PHC deleted successfully",
+        "phc_id": phc_id
+    }
 
 # ==================================================
 # MEDICINE APIs
