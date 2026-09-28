@@ -1,3 +1,6 @@
+
+#  ------------------------------------------
+
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
@@ -21,9 +24,9 @@ pytesseract.pytesseract.tesseract_cmd = (
 from database import engine, get_db
 
 
+#==================+++++++++++==============
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
-
 
 
 # Create FastAPI application
@@ -39,6 +42,361 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ==================================================
+# DEMO DATA SEEDING
+# ==================================================
+
+def seed_demo_data():
+
+    db = next(get_db())
+
+    try:
+
+        # --------------------------------------------------
+        # 1. DEMO PHCs
+        # --------------------------------------------------
+
+        phc_data = [
+            {
+                "name": "PHC Gorakhpur",
+                "district": "Gorakhpur",
+                "state": "Uttar Pradesh",
+                "latitude": 26.7606,
+                "longitude": 83.3732
+            },
+            {
+                "name": "PHC Deoria",
+                "district": "Deoria",
+                "state": "Uttar Pradesh",
+                "latitude": 26.5036,
+                "longitude": 83.7791
+            },
+            {
+                "name": "PHC Kushinagar",
+                "district": "Kushinagar",
+                "state": "Uttar Pradesh",
+                "latitude": 26.7410,
+                "longitude": 83.8889
+            },
+            {
+                "name": "PHC Basti",
+                "district": "Basti",
+                "state": "Uttar Pradesh",
+                "latitude": 26.8177,
+                "longitude": 82.7636
+            }
+        ]
+
+        for data in phc_data:
+
+            existing = db.query(models.PHC).filter(
+                models.PHC.name == data["name"]
+            ).first()
+
+            if not existing:
+
+                db.add(
+                    models.PHC(
+                        name=data["name"],
+                        district=data["district"],
+                        state=data["state"],
+                        latitude=data["latitude"],
+                        longitude=data["longitude"]
+                    )
+                )
+
+        db.commit()
+
+
+        # --------------------------------------------------
+        # 2. DEMO MEDICINES
+        # --------------------------------------------------
+
+        medicine_data = [
+            ("Paracetamol", "Analgesic"),
+            ("Amoxicillin", "Antibiotic"),
+            ("Azithromycin", "Antibiotic"),
+            ("Ibuprofen", "Analgesic"),
+            ("ORS", "Rehydration")
+        ]
+
+        for name, category in medicine_data:
+
+            existing = db.query(models.Medicine).filter(
+                models.Medicine.name == name
+            ).first()
+
+            if not existing:
+
+                db.add(
+                    models.Medicine(
+                        name=name,
+                        category=category
+                    )
+                )
+
+        db.commit()
+
+
+        # --------------------------------------------------
+        # GET PHCs AND MEDICINES
+        # --------------------------------------------------
+
+        phcs = db.query(models.PHC).all()
+        medicines = db.query(models.Medicine).all()
+
+
+        # --------------------------------------------------
+        # 3. DEMO INVENTORY
+        # --------------------------------------------------
+
+        stock_data = {
+
+            "PHC Gorakhpur": {
+                "Paracetamol": (850, 100),
+                "Amoxicillin": (80, 100),
+                "Azithromycin": (350, 100),
+                "Ibuprofen": (500, 100),
+                "ORS": (1000, 200)
+            },
+
+            "PHC Deoria": {
+                "Paracetamol": (500, 100),
+                "Amoxicillin": (400, 100),
+                "Azithromycin": (40, 100),
+                "Ibuprofen": (300, 100),
+                "ORS": (700, 200)
+            },
+
+            "PHC Kushinagar": {
+                "Paracetamol": (50, 100),
+                "Amoxicillin": (250, 100),
+                "Azithromycin": (300, 100),
+                "Ibuprofen": (60, 100),
+                "ORS": (500, 200)
+            },
+
+            "PHC Basti": {
+                "Paracetamol": (700, 100),
+                "Amoxicillin": (500, 100),
+                "Azithromycin": (450, 100),
+                "Ibuprofen": (400, 100),
+                "ORS": (800, 200)
+            }
+        }
+
+
+        for phc in phcs:
+
+            if phc.name not in stock_data:
+                continue
+
+            for medicine in medicines:
+
+                if medicine.name not in stock_data[phc.name]:
+                    continue
+
+                quantity, minimum_stock = stock_data[
+                    phc.name
+                ][medicine.name]
+
+                existing = db.query(
+                    models.Inventory
+                ).filter(
+                    models.Inventory.phc_id == phc.id,
+                    models.Inventory.medicine_id == medicine.id
+                ).first()
+
+                if not existing:
+
+                    db.add(
+                        models.Inventory(
+                            phc_id=phc.id,
+                            medicine_id=medicine.id,
+                            quantity=quantity,
+                            minimum_stock=minimum_stock
+                        )
+                    )
+
+        db.commit()
+
+
+        # --------------------------------------------------
+        # 4. DEMO PATIENT VISITS
+        # --------------------------------------------------
+
+        visit_data = {
+
+            "PHC Gorakhpur": [180, 195, 210, 175, 220],
+            "PHC Deoria": [145, 160, 155, 170, 180],
+            "PHC Kushinagar": [210, 225, 205, 230, 240],
+            "PHC Basti": [120, 135, 128, 140, 150]
+        }
+
+
+        for phc in phcs:
+
+            if phc.name not in visit_data:
+                continue
+
+            existing_visits = db.query(
+                models.PatientVisit
+            ).filter(
+                models.PatientVisit.phc_id == phc.id
+            ).count()
+
+            if existing_visits == 0:
+
+                for index, count in enumerate(
+                    visit_data[phc.name]
+                ):
+
+                    db.add(
+                        models.PatientVisit(
+                            phc_id=phc.id,
+                            date=f"2026-09-{10 + index}",
+                            patient_count=count
+                        )
+                    )
+
+        db.commit()
+
+
+        # --------------------------------------------------
+        # 5. DEMO SUPPLIER
+        # --------------------------------------------------
+
+        supplier = db.query(
+            models.Supplier
+        ).filter(
+            models.Supplier.name == "HealthCare Pharma Supplier"
+        ).first()
+
+        if not supplier:
+
+            supplier = models.Supplier(
+                name="HealthCare Pharma Supplier",
+                phone="9999999999",
+                email="supplier@healthresq.demo"
+            )
+
+            db.add(supplier)
+            db.commit()
+            db.refresh(supplier)
+
+
+        # --------------------------------------------------
+        # 6. DEMO TRANSFER REQUEST
+        # --------------------------------------------------
+
+        transfer_exists = db.query(
+            models.TransferRequest
+        ).first()
+
+        if not transfer_exists:
+
+            gorakhpur = db.query(
+                models.PHC
+            ).filter(
+                models.PHC.name == "PHC Gorakhpur"
+            ).first()
+
+            kushinagar = db.query(
+                models.PHC
+            ).filter(
+                models.PHC.name == "PHC Kushinagar"
+            ).first()
+
+            paracetamol = db.query(
+                models.Medicine
+            ).filter(
+                models.Medicine.name == "Paracetamol"
+            ).first()
+
+            if gorakhpur and kushinagar and paracetamol:
+
+                db.add(
+                    models.TransferRequest(
+                        from_phc_id=gorakhpur.id,
+                        to_phc_id=kushinagar.id,
+                        medicine_id=paracetamol.id,
+                        quantity=200,
+                        status="PENDING"
+                    )
+                )
+
+                db.commit()
+
+
+        # --------------------------------------------------
+        # 7. DEMO SUPPLIER ALERT
+        # --------------------------------------------------
+
+        alert_exists = db.query(
+            models.SupplierAlert
+        ).first()
+
+        if not alert_exists:
+
+            kushinagar = db.query(
+                models.PHC
+            ).filter(
+                models.PHC.name == "PHC Kushinagar"
+            ).first()
+
+            paracetamol = db.query(
+                models.Medicine
+            ).filter(
+                models.Medicine.name == "Paracetamol"
+            ).first()
+
+            if kushinagar and paracetamol and supplier:
+
+                db.add(
+                    models.SupplierAlert(
+                        supplier_id=supplier.id,
+                        phc_id=kushinagar.id,
+                        medicine_id=paracetamol.id,
+                        message=(
+                            "LOW STOCK: Paracetamol stock is "
+                            "below minimum level at PHC Kushinagar."
+                        ),
+                        status="PENDING"
+                    )
+                )
+
+                db.commit()
+
+
+        print("Demo data seeding completed successfully.")
+
+
+    except Exception as e:
+
+        db.rollback()
+
+        print(
+            "Demo data seeding error:",
+            str(e)
+        )
+
+    finally:
+
+        db.close()
+
+
+# Seed demo data when backend starts
+seed_demo_data()
+
+#===============================++++++++++++++++++=========================
+
+# Create database tables
+models.Base.metadata.create_all(bind=engine)
+
+
+
+
 
 # --------------------------------------------------
 # HOME
