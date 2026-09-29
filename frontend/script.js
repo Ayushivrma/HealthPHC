@@ -47,7 +47,11 @@ async function loadPHCs() {
     }
 
 }
-let medicineSearchTimeout;
+// --------------------------------------------------
+// FORECAST MEDICINE SEARCH + DROPDOWN
+// --------------------------------------------------
+
+let phcMedicines = [];
 
 const medicineSearch =
     document.getElementById("medicineSearch");
@@ -55,82 +59,113 @@ const medicineSearch =
 const medicineSelect =
     document.getElementById("forecastMedicine");
 
-medicineSearch.addEventListener("input", function () {
 
-    clearTimeout(medicineSearchTimeout);
-
-    const query = medicineSearch.value.trim().toLowerCase();
+// Load medicines available in selected PHC
+async function loadForecastMedicines(phcId) {
 
     medicineSelect.innerHTML =
         '<option value="">Select Medicine</option>';
 
-    if (query.length < 2) {
+    phcMedicines = [];
+
+    if (!phcId) {
         return;
     }
 
-    medicineSearchTimeout = setTimeout(async function () {
+    try {
 
-        try {
+        const response =
+            await fetch(`${API_URL}/inventory/${phcId}`);
 
-            // Get medicines available in our PHC database
-            const localResponse =
-                await fetch(`${API_URL}/medicines`);
+        const inventory =
+            await response.json();
 
-            const localMedicines =
-                await localResponse.json();
+        // Take medicines from this PHC inventory
+        phcMedicines = inventory.map(item => ({
+            id: item.medicine_id,
+            name: item.medicine_name
+        }));
 
-            // Find matching local medicines
-            const matches =
-                localMedicines.filter(medicine =>
+        // Remove duplicate medicines
+        phcMedicines =
+            phcMedicines.filter(
+                (medicine, index, self) =>
+                    index ===
+                    self.findIndex(
+                        m => m.id === medicine.id
+                    )
+            );
+
+        showForecastMedicines(phcMedicines);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading forecast medicines:",
+            error
+        );
+
+    }
+}
+
+
+// Show medicines in dropdown
+function showForecastMedicines(medicines) {
+
+    medicineSelect.innerHTML =
+        '<option value="">Select Medicine</option>';
+
+    medicines.forEach(medicine => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            medicine.id;
+
+        option.textContent =
+            medicine.name;
+
+        medicineSelect.appendChild(option);
+
+    });
+
+}
+
+
+// Search medicines
+medicineSearch.addEventListener(
+    "input",
+    function () {
+
+        const query =
+            medicineSearch.value
+                .trim()
+                .toLowerCase();
+
+        // Empty search = show ALL medicines
+        if (query.length === 0) {
+
+            showForecastMedicines(phcMedicines);
+
+            return;
+        }
+
+        // Filter medicines
+        const filteredMedicines =
+            phcMedicines.filter(
+                medicine =>
                     medicine.name
                         .toLowerCase()
                         .includes(query)
-                );
-
-            matches.forEach(medicine => {
-
-                const option =
-                    document.createElement("option");
-
-                // IMPORTANT:
-                // Use local database medicine ID
-                option.value = medicine.id;
-
-                option.textContent =
-                    medicine.name;
-
-                medicineSelect.appendChild(option);
-
-            });
-
-            // If no local medicine found,
-            // show message instead of sending RxNorm ID
-            if (matches.length === 0) {
-
-                const option =
-                    document.createElement("option");
-
-                option.value = "";
-
-                option.textContent =
-                    "Medicine not available in PHC database";
-
-                medicineSelect.appendChild(option);
-            }
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Error searching medicines:",
-                error
             );
 
-        }
+        showForecastMedicines(filteredMedicines);
 
-    }, 300);
-});
+    }
+);
 
 // --------------------------------------------------
 // LOAD INVENTORY
@@ -283,6 +318,9 @@ phcSelect.addEventListener(
             this.value;
 
         loadInventory(phcId);
+
+        // Load medicines for forecast dropdown
+        loadForecastMedicines(phcId);
 
     }
 );
