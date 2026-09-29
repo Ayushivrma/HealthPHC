@@ -59,7 +59,7 @@ medicineSearch.addEventListener("input", function () {
 
     clearTimeout(medicineSearchTimeout);
 
-    const query = medicineSearch.value.trim();
+    const query = medicineSearch.value.trim().toLowerCase();
 
     medicineSelect.innerHTML =
         '<option value="">Select Medicine</option>';
@@ -72,22 +72,29 @@ medicineSearch.addEventListener("input", function () {
 
         try {
 
-            const response = await fetch(
-                `${API_URL}/medicines/search?name=${encodeURIComponent(query)}`
-            );
+            // Get medicines available in our PHC database
+            const localResponse =
+                await fetch(`${API_URL}/medicines`);
 
-            if (!response.ok) {
-                throw new Error("Medicine search failed");
-            }
+            const localMedicines =
+                await localResponse.json();
 
-            const medicines = await response.json();
+            // Find matching local medicines
+            const matches =
+                localMedicines.filter(medicine =>
+                    medicine.name
+                        .toLowerCase()
+                        .includes(query)
+                );
 
-            medicines.forEach(medicine => {
+            matches.forEach(medicine => {
 
                 const option =
                     document.createElement("option");
 
-                option.value = medicine.rxcui;
+                // IMPORTANT:
+                // Use local database medicine ID
+                option.value = medicine.id;
 
                 option.textContent =
                     medicine.name;
@@ -96,7 +103,24 @@ medicineSearch.addEventListener("input", function () {
 
             });
 
-        } catch (error) {
+            // If no local medicine found,
+            // show message instead of sending RxNorm ID
+            if (matches.length === 0) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = "";
+
+                option.textContent =
+                    "Medicine not available in PHC database";
+
+                medicineSelect.appendChild(option);
+            }
+
+        }
+
+        catch (error) {
 
             console.error(
                 "Error searching medicines:",
@@ -901,3 +925,547 @@ async function testBackendConnection() {
 }
 
 testBackendConnection();
+
+
+// ========================================================
+// PROFILE DROPDOWN + PROFILE UPDATE
+// ========================================================
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ---------- ELEMENTS ----------
+
+    const profileButton = document.getElementById("profileButton");
+    const profileDropdown = document.getElementById("profileDropdown");
+    const profileWrapper = document.querySelector(".user-profile-wrapper");
+
+    const viewProfileBtn = document.getElementById("viewProfileBtn");
+    const editProfileBtn = document.getElementById("editProfileBtn");
+    const anotherAccountBtn = document.getElementById("anotherAccountBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const profileModal = document.getElementById("profileModal");
+    const closeProfileModal = document.getElementById("closeProfileModal");
+    const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+    const saveProfileBtn = document.getElementById("saveProfileBtn");
+
+    const profileName = document.getElementById("profileName");
+    const profileEmail = document.getElementById("profileEmail");
+    const profilePhone = document.getElementById("profilePhone");
+    const profileRole = document.getElementById("profileRole");
+
+    const profilePictureInput =
+        document.getElementById("profilePictureInput");
+
+    const largeProfileAvatar =
+        document.getElementById("largeProfileAvatar");
+
+    const dropdownAvatar =
+        document.getElementById("dropdownAvatar");
+
+    // ---------- PROFILE DATA ----------
+
+    function getProfileData() {
+
+        const savedProfile =
+            localStorage.getItem("healthresq_profile");
+
+        if (savedProfile) {
+            try {
+                return JSON.parse(savedProfile);
+            } catch (error) {
+                console.error("Profile data error:", error);
+            }
+        }
+
+        return {
+            name: localStorage.getItem("healthresq_user") || "User",
+            email: "",
+            phone: "",
+            role: "Administrator",
+            picture: ""
+        };
+    }
+
+
+    // ---------- UPDATE DASHBOARD PROFILE ----------
+
+    function updateProfileUI() {
+
+        const profile = getProfileData();
+
+        const loggedInName =
+            document.getElementById("loggedInName");
+
+        const loggedInEmail =
+            document.getElementById("loggedInEmail");
+
+        const dropdownName =
+            document.getElementById("dropdownName");
+
+        const dropdownEmail =
+            document.getElementById("dropdownEmail");
+
+        const userAvatar =
+            document.getElementById("userAvatar");
+
+
+        if (loggedInName) {
+            loggedInName.textContent = profile.name;
+        }
+
+        if (loggedInEmail) {
+            loggedInEmail.textContent =
+                profile.email || profile.role;
+        }
+
+        if (dropdownName) {
+            dropdownName.textContent = profile.name;
+        }
+
+        if (dropdownEmail) {
+            dropdownEmail.textContent =
+                profile.email || profile.role;
+        }
+
+
+        // Initials
+        const initials = profile.name
+            .split(" ")
+            .map(word => word.charAt(0))
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+
+
+        if (profile.picture) {
+
+            const imageHTML =
+                `<img src="${profile.picture}" alt="Profile">`;
+
+            if (userAvatar) {
+                userAvatar.innerHTML = imageHTML;
+            }
+
+            if (dropdownAvatar) {
+                dropdownAvatar.innerHTML = imageHTML;
+            }
+
+            if (largeProfileAvatar) {
+                largeProfileAvatar.innerHTML = imageHTML;
+            }
+
+        } else {
+
+            if (userAvatar) {
+                userAvatar.textContent = initials;
+            }
+
+            if (dropdownAvatar) {
+                dropdownAvatar.textContent = initials;
+            }
+
+            if (largeProfileAvatar) {
+                largeProfileAvatar.textContent = initials;
+            }
+        }
+    }
+
+
+    // ====================================================
+    // PROFILE DROPDOWN
+    // ====================================================
+
+    if (profileButton) {
+
+        profileButton.addEventListener("click", function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            profileDropdown.classList.toggle("hidden");
+
+            if (profileWrapper) {
+                profileWrapper.classList.toggle("active");
+            }
+        });
+    }
+
+
+    // Close dropdown when clicking outside
+
+    document.addEventListener("click", function (event) {
+
+        if (
+            profileWrapper &&
+            !profileWrapper.contains(event.target)
+        ) {
+
+            profileDropdown.classList.add("hidden");
+
+            profileWrapper.classList.remove("active");
+        }
+    });
+
+
+    // ====================================================
+    // OPEN PROFILE MODAL
+    // ====================================================
+
+    function openProfileModal() {
+
+        const profile = getProfileData();
+
+        profileName.value = profile.name || "";
+        profileEmail.value = profile.email || "";
+        profilePhone.value = profile.phone || "";
+        profileRole.value =
+            profile.role || "Administrator";
+
+        profileModal.classList.remove("hidden");
+
+        profileDropdown.classList.add("hidden");
+
+        if (profileWrapper) {
+            profileWrapper.classList.remove("active");
+        }
+
+        updateProfileUI();
+    }
+
+
+    // Edit Profile
+
+    if (editProfileBtn) {
+
+        editProfileBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                openProfileModal();
+            }
+        );
+    }
+
+
+    // My Profile
+
+    if (viewProfileBtn) {
+
+        viewProfileBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                openProfileModal();
+            }
+        );
+    }
+
+
+    // ====================================================
+    // PROFILE PHOTO
+    // ====================================================
+
+    if (profilePictureInput) {
+
+        profilePictureInput.addEventListener(
+            "change",
+            function () {
+
+                const file = this.files[0];
+
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+
+                    alert("Please select an image file.");
+
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+
+                    const image =
+                        event.target.result;
+
+                    largeProfileAvatar.innerHTML =
+                        `<img src="${image}" alt="Profile">`;
+
+                    const profile = getProfileData();
+
+                    profile.picture = image;
+
+                    localStorage.setItem(
+                        "healthresq_profile",
+                        JSON.stringify(profile)
+                    );
+                };
+
+                reader.readAsDataURL(file);
+            }
+        );
+    }
+
+
+    // ====================================================
+    // SAVE CHANGES
+    // ====================================================
+
+    if (saveProfileBtn) {
+
+        saveProfileBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                const name =
+                    profileName.value.trim();
+
+                const email =
+                    profileEmail.value.trim();
+
+                const phone =
+                    profilePhone.value.trim();
+
+                const role =
+                    profileRole.value;
+
+
+                // Only NAME is required
+                // Photo is NOT required
+
+                if (!name) {
+
+                    alert("Please enter your name.");
+
+                    profileName.focus();
+
+                    return;
+                }
+
+
+                const oldProfile =
+                    getProfileData();
+
+
+                const updatedProfile = {
+
+                    name: name,
+
+                    email: email,
+
+                    phone: phone,
+
+                    role: role,
+
+                    picture:
+                        oldProfile.picture || ""
+                };
+
+
+                // Save profile
+
+                localStorage.setItem(
+                    "healthresq_profile",
+                    JSON.stringify(updatedProfile)
+                );
+
+
+                // Update logged-in user
+
+                localStorage.setItem(
+                    "healthresq_user",
+                    name
+                );
+
+
+                // Update dashboard
+
+                updateProfileUI();
+
+
+                // Close modal
+
+                profileModal.classList.add("hidden");
+
+
+                alert("Profile updated successfully!");
+            }
+        );
+    }
+
+
+    // ====================================================
+    // CLOSE WITH X
+    // ====================================================
+
+    if (closeProfileModal) {
+
+        closeProfileModal.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                profileModal.classList.add("hidden");
+            }
+        );
+    }
+
+
+    // ====================================================
+    // CANCEL BUTTON
+    // ====================================================
+
+    if (cancelProfileBtn) {
+
+        cancelProfileBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                profileModal.classList.add("hidden");
+            }
+        );
+    }
+
+
+    // ====================================================
+    // CLICK OUTSIDE MODAL
+    // ====================================================
+
+    if (profileModal) {
+
+        profileModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (event.target === profileModal) {
+
+                    profileModal.classList.add("hidden");
+                }
+            }
+        );
+    }
+
+
+    // ====================================================
+    // LOGIN WITH ANOTHER ACCOUNT
+    // ====================================================
+
+    if (anotherAccountBtn) {
+
+        anotherAccountBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                localStorage.removeItem(
+                    "healthresq_user"
+                );
+
+                localStorage.removeItem(
+                    "healthresq_profile"
+                );
+
+                window.location.reload();
+            }
+        );
+    }
+
+
+    // ====================================================
+    // LOGOUT
+    // ====================================================
+
+    if (logoutBtn) {
+
+        logoutBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                const confirmLogout =
+                    confirm(
+                        "Are you sure you want to logout?"
+                    );
+
+                if (!confirmLogout) return;
+
+                localStorage.removeItem(
+                    "healthresq_user"
+                );
+
+                window.location.reload();
+            }
+        );
+    }
+
+
+    // ====================================================
+    // INITIAL PROFILE LOAD
+    // ====================================================
+
+    updateProfileUI();
+
+});
+
+/* ================= LOGIN FLOW ================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const loginForm = document.getElementById("loginForm");
+    const loginScreen = document.getElementById("loginScreen");
+    const appContainer = document.getElementById("appContainer");
+    const loginName = document.getElementById("loginName");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginError = document.getElementById("loginError");
+
+    if (!loginForm) return;
+
+    loginForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        const name = loginName.value.trim();
+        const password = loginPassword.value.trim();
+
+        if (!name || !password) {
+            loginError.textContent = "Please enter your name and password.";
+            return;
+        }
+
+        // Save logged-in user
+        localStorage.setItem("healthresq_user", name);
+
+        // Hide login screen
+        loginScreen.classList.add("hidden");
+
+        // Show main dashboard
+        appContainer.classList.remove("hidden");
+
+        // Update welcome message
+        const welcomeHeading = document.querySelector(".welcome h1");
+
+        if (welcomeHeading) {
+            welcomeHeading.textContent = `Welcome back, ${name}! 👋`;
+        }
+
+        // Load dashboard data
+        if (typeof loadPHCs === "function") {
+            loadPHCs();
+        }
+
+    });
+
+});

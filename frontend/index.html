@@ -12,162 +12,752 @@
 
 <body>
 
-    <!-- HEADER -->
+    <!-- ================= LOGIN SCREEN ================= -->
 
-    <header>
-        <div class="logo">
-            HealthResQ AI
-        </div>
+    <div id="loginScreen" class="login-screen">
 
-        <div class="tagline">
-            Right Medicine. Right PHC. Right Time.
-        </div>
-    </header>
+        <div class="login-card">
+
+            <div class="login-logo">
+                <div class="login-logo-icon">✚</div>
+
+                <h1>HealthResQ <span>AI</span></h1>
+
+                <p>Primary Healthcare Resource Management</p>
+            </div>
 
 
-    <!-- MAIN -->
+            <form id="loginForm">
 
-    <main>
+                <div class="login-field">
 
-        <section class="welcome">
+                    <label for="loginName">
+                        Full Name
+                    </label>
 
-            <h1>PHC Resource Dashboard</h1>
+                    <input
+                        type="text"
+                        id="loginName"
+                        placeholder="Enter your name"
+                        required
+                    >
 
-            <p>
-                Monitor medicine availability across Primary Health Centres.
+                </div>
+
+
+                <div class="login-field">
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Enter password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Login
+                </button>
+
+
+                <p id="loginError" class="login-error"></p>
+
+            </form>
+
+
+            <p class="login-footer">
+                Secure access to HealthResQ AI Dashboard
             </p>
 
-        </section>
+        </div>
+
+    </div>
 
 
-        <!-- PHC SELECTION -->
+    <!-- ================= MAIN APPLICATION ================= -->
 
-        <section class="phc-section">
-
-            <label for="phcSelect">
-                Select PHC
-            </label>
-
-            <select id="phcSelect">
-
-                <option value="">
-                    -- Select PHC --
-                </option>
-
-            </select>
-
-        </section>
+    <div id="appContainer" class="app-container hidden">
 
 
-        <!-- INVENTORY -->
+        <!-- ================= SIDEBAR ================= -->
 
-        <section class="inventory-section">
+        <aside class="sidebar">
 
-            <h2>Medicine Inventory</h2>
+            <div class="brand">
 
-            <div id="inventoryContainer">
+                <div class="brand-icon">
+                    ♥
+                </div>
 
-                <p class="message">
-                    Select a PHC to view inventory.
+                <div>
+                    <h2>HealthResQ <span>AI</span></h2>
+                    <p>Smarter Health. Stronger Communities.</p>
+                </div>
+
+            </div>
+
+
+            <nav class="sidebar-nav">
+
+                <a href="#dashboard" class="nav-item active">
+                    <span>⌂</span>
+                    Dashboard
+                </a>
+
+                <a href="#inventory" class="nav-item">
+                    <span>▣</span>
+                    Inventory
+                </a>
+
+                <a href="#forecast" class="nav-item">
+                    <span>↗</span>
+                    AI Forecast
+                </a>
+
+                <a href="#prescription" class="nav-item">
+                    <span>▤</span>
+                    Prescription Scanner
+                </a>
+
+                <a href="#national" class="nav-item">
+                    <span>♧</span>
+                    National Health Network
+                </a>
+
+                <a href="#system" class="nav-item">
+                    <span>⚙</span>
+                    System Status
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <div class="health-illustration">
+                    ✚
+                </div>
+
+                <p>
+                    Better Inventory.<br>
+                    Healthier Tomorrow.
                 </p>
 
             </div>
 
-        </section>
-        <section class="forecast-section">
+        </aside>
 
-    <h2>AI Demand Forecast</h2>
 
-    <div class="forecast-controls">
+        <!-- ================= TOP HEADER ================= -->
 
-        <input
-    type="text"
-    id="medicineSearch"
-    placeholder="Search medicine..."
-    autocomplete="off"
->
+        <header class="topbar">
 
-<select id="forecastMedicine">
-    <option value="">Select Medicine</option>
-</select>
+            <div class="topbar-left">
 
-        <button onclick="loadForecast()">
-            Generate AI Forecast
-        </button>
+                <span class="mobile-brand">
+                    HealthResQ AI
+                </span>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <span class="system-online">
+                    <span class="online-dot"></span>
+                    System Online
+                </span>
+
+                <span class="notification">
+                    ♧
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= DASHBOARD ================= -->
+
+        <main id="dashboard">
+
+
+            <!-- ================= WELCOME ================= -->
+
+            <section class="welcome">
+
+                <div>
+
+                    <h1>
+                        Welcome back, Ayushi! 👋
+                    </h1>
+
+                    <p>
+                        Here's what's happening with your PHC network today.
+                    </p>
+
+                </div>
+
+                <div class="date-display">
+                    📅 <span>Health Resource Dashboard</span>
+                </div>
+
+            </section>
+
+
+            <!-- ================= TOP GRID ================= -->
+
+            <div class="top-grid">
+
+
+                <!-- PHC SELECTION -->
+
+                <section class="dashboard-card phc-section">
+
+                    <div class="section-heading">
+
+                        <div class="section-icon phc-icon">
+                            ♧
+                        </div>
+
+                        <div>
+
+                            <h2>Select PHC</h2>
+
+                            <p>
+                                Choose a Primary Health Centre to view data
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <label for="phcSelect">
+                        Primary Health Centre
+                    </label>
+
+                    <select id="phcSelect">
+
+                        <option value="">
+                            -- Select PHC --
+                        </option>
+
+                    </select>
+
+                </section>
+
+
+                <!-- INVENTORY -->
+
+                <section
+                    class="dashboard-card inventory-section"
+                    id="inventory"
+                >
+
+                    <div class="section-heading">
+
+                        <div class="section-icon medicine-icon">
+                            💊
+                        </div>
+
+                        <div>
+
+                            <h2>Medicine Inventory</h2>
+
+                            <p>
+                                Current stock levels at selected PHC
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="inventoryContainer">
+
+                        <p class="message">
+                            Select a PHC to view inventory.
+                        </p>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- ================= SECOND GRID ================= -->
+
+            <div class="main-grid">
+
+
+                <!-- ================= AI FORECAST ================= -->
+
+                <section
+                    class="dashboard-card forecast-section"
+                    id="forecast"
+                >
+
+                    <div class="section-heading">
+
+                        <div class="section-icon forecast-icon">
+                            ✨
+                        </div>
+
+                        <div>
+
+                            <h2>AI Demand Forecast</h2>
+
+                            <p>
+                                Predict medicine demand and avoid stockouts
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="forecast-controls">
+
+                        <div class="medicine-search-wrapper">
+
+                            <label for="medicineSearch">
+                                Medicine
+                            </label>
+
+                            <div class="search-box">
+
+                                <span>
+                                    🔍
+                                </span>
+
+                                <input
+                                    type="text"
+                                    id="medicineSearch"
+                                    placeholder="Search medicine..."
+                                    autocomplete="off"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="medicine-select-wrapper">
+
+                            <label>
+                                Select Medicine
+                            </label>
+
+                            <select id="forecastMedicine">
+
+                                <option value="">
+                                    Select Medicine
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            class="primary-button forecast-button"
+                            onclick="loadForecast()"
+                        >
+                            ✨ Generate Forecast
+                        </button>
+
+                    </div>
+
+
+                    <div class="forecast-help">
+
+                        <span>💡</span>
+
+                        <p>
+                            Type at least 2 characters to search for
+                            medicines available in this PHC's inventory.
+                        </p>
+
+                    </div>
+
+
+                    <div id="forecastResult">
+
+                        <p class="message">
+                            Select a medicine to generate demand forecast.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= PRESCRIPTION ================= -->
+
+                <section
+                    class="dashboard-card prescription-section"
+                    id="prescription"
+                >
+
+                    <div class="section-heading">
+
+                        <div class="section-icon prescription-icon">
+                            ▤
+                        </div>
+
+                        <div>
+
+                            <h2>Prescription Scanner</h2>
+
+                            <p>
+                                Upload a patient's prescription and check
+                                medicine availability.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <form id="prescriptionForm">
+
+                        <div class="upload-box">
+
+                            <div class="upload-icon">
+                                ☁
+                            </div>
+
+                            <h3>
+                                Upload Prescription
+                            </h3>
+
+                            <p>
+                                Choose a prescription image to analyze
+                            </p>
+
+                            <input
+                                type="file"
+                                id="prescriptionFile"
+                                accept=".jpg,.jpeg,.png"
+                                required
+                            >
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Check Prescription
+                        </button>
+
+                    </form>
+
+
+                    <div id="uploadResult"></div>
+
+                    <div id="prescriptionResult"></div>
+
+                </section>
+
+            </div>
+
+
+            <!-- ================= NATIONAL NETWORK ================= -->
+
+            <section
+                class="dashboard-card national-section"
+                id="national"
+            >
+
+                <div class="section-heading">
+
+                    <div class="section-icon network-icon">
+                        ♧
+                    </div>
+
+                    <div>
+
+                        <h2>National Health Network</h2>
+
+                        <p>
+                            Live network stats across all Primary Health Centres
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="secondary-button"
+                    onclick="loadNationalDashboard()"
+                >
+                    Load Network Dashboard
+                </button>
+
+
+                <div id="nationalDashboard">
+
+                    <p class="message">
+                        Click the button to load national network status.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= SYSTEM STATUS ================= -->
+
+            <section
+                class="dashboard-card system-section"
+                id="system"
+            >
+
+                <div class="section-heading">
+
+                    <div class="section-icon system-icon">
+                        ⚙
+                    </div>
+
+                    <div>
+
+                        <h2>System Status</h2>
+
+                        <p>
+                            Real-time health of the HealthResQ AI platform
+                        </p>
+
+                    </div>
+
+                    <span class="status-pill operational">
+
+                        <span></span>
+
+                        All Systems Operational
+
+                    </span>
+
+                </div>
+
+
+                <button
+                    class="secondary-button"
+                    onclick="loadSystemStatus()"
+                >
+                    Check System Status
+                </button>
+
+
+                <div id="systemStatus"></div>
+
+            </section>
+
+
+        </main>
+
+
+        <!-- ================= FOOTER ================= -->
+
+        <footer>
+
+            <p>
+                © 2026 HealthResQ AI · Smarter Healthcare Resource Management
+            </p>
+
+        </footer>
+
 
     </div>
 
-    <div id="forecastResult">
-        <p class="message">
-            Select a medicine to generate demand forecast.
-        </p>
+
+    <!-- ================= PROFILE MODAL ================= -->
+
+    <div class="modal-overlay hidden" id="profileModal">
+
+        <div class="profile-modal">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>My Profile</h2>
+
+                    <p>
+                        Update your profile information
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    id="closeProfileModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="profile-picture-section">
+
+                <div
+                    class="large-profile-avatar"
+                    id="largeProfileAvatar"
+                >
+                    U
+                </div>
+
+
+                <div>
+
+                    <label class="upload-picture-btn">
+
+                        📷 Change Profile Picture
+
+                        <input
+                            type="file"
+                            id="profilePictureInput"
+                            accept="image/*"
+                            hidden
+                        >
+
+                    </label>
+
+
+                    <p class="picture-hint">
+                        JPG, PNG or WEBP
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-form">
+
+                <div class="profile-field">
+
+                    <label>
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profileName"
+                        placeholder="Enter your name"
+                    >
+
+                </div>
+
+
+                <div class="profile-field">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="profileEmail"
+                        placeholder="Enter your email"
+                    >
+
+                </div>
+
+
+                <div class="profile-field">
+
+                    <label>
+                        Phone Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="profilePhone"
+                        placeholder="Enter phone number"
+                    >
+
+                </div>
+
+
+                <div class="profile-field">
+
+                    <label>
+                        Role
+                    </label>
+
+                    <select id="profileRole">
+
+                        <option>
+                            Administrator
+                        </option>
+
+                        <option>
+                            PHC Manager
+                        </option>
+
+                        <option>
+                            Health Officer
+                        </option>
+
+                        <option>
+                            Inventory Manager
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancelProfileBtn"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="button"
+                    class="save-profile-btn"
+                    id="saveProfileBtn"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+
+        </div>
+
     </div>
 
-</section>
-<section class="prescription-section">
 
-    <h2>Prescription Scanner</h2>
-
-    <p>
-        Upload a patient's prescription and check medicine availability.
-    </p>
-
-    <form id="prescriptionForm">
-
-        <input
-            type="file"
-            id="prescriptionFile"
-            accept=".jpg,.jpeg,.png"
-            required
-        >
-
-        <button type="submit">
-            Check Prescription
-        </button>
-
-    </form>
-
-    <div id="uploadResult"></div>
-
-    <div id="prescriptionResult"></div>
-
-</section>
-
-<section class="national-section">
-
-    <h2>National Health Network</h2>
-
-    <button onclick="loadNationalDashboard()">
-        Load National Dashboard
-    </button>
-
-    <div id="nationalDashboard">
-
-        <p class="message">
-            Click the button to load national network status.
-        </p>
-
-    </div>
-
-</section>
-<section class="system-section">
-
-    <h2>System Status</h2>
-
-    <button onclick="loadSystemStatus()">
-        Check System Status
-    </button>
-
-    <div id="systemStatus"></div>
-
-</section>
-
-    </main>
-
+    <!-- ================= JAVASCRIPT ================= -->
 
     <script src="script.js"></script>
 
 </body>
 
 </html>
-
